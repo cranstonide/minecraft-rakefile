@@ -1,0 +1,3 @@
+sigma:
+  minecraft_directory: '/home/test/'
+  render_directory: '/srv/http'
