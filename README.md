@@ -19,7 +19,7 @@ Add cron entries to automate tasks. You can edit your crontab by running `cronta
 
     0    0    *     *    *    rake -f ~/minecraft-rakefile/Rakefile server:backup
     0    */6  *     *    *    rake -f ~/minecraft-rakefile/Rakefile render:update
-    */5  *    *     *    *    rake -f ~/minecraft-rakefile/Rakefile render:poiupdate
+    */10 *    *     *    *    rake -f ~/minecraft-rakefile/Rakefile render:poiupdate
 
 Manually Running Tasks
 ----------------------
