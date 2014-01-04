@@ -5,38 +5,41 @@
 # |_|  |_|_|_| |_|\___|\___|_|  \__,_|_|  \__| |_| \_\__,_|_|\_\___|_| |_|_|\___|
 #
 
-  #def config
-  #  @config ||= YAML.load_file File.join(Rails.root, 'config.yml')
-  #end
+require 'yaml'
 
-# TODO move configuration into YML file
+def config
+    @config ||= YAML.load_file File.join(rakefile_directory, 'config.yml')
+end
+
 def server_nickname
-    'sigma'
+    # This is where I could accept input from the arglist to see which server theyd like to manage (?)
+    config.keys.first
 end
 
 def backup_file
-    "#{backup_directory}#{server_nickname}-#{Time.new.strftime("%Y-%m-%d")}.tar.gz"
-end
-
-def backup_directory
-    "/data/Games/Minecraft/Server\ Backups/#{server_nickname}/"
+    filename  = "#{server_nickname}-#{Time.new.strftime("%Y-%m-%d")}.tar.gz"
+    directory = config[server_nickname].fetch('backup_directory')
+    File.expand_path File.join(directory, filename)
 end
 
 def minecraft_directory
-    "/home/#{server_nickname}/minecraft/"
+    File.expand_path config[server_nickname].fetch('minecraft_server_directory')
+end
+
+def rakefile_directory
+    File.expand_path File.dirname(__FILE__)
 end
 
 def render_directory
-    "/srv/http/#{server_nickname}/"
+    File.expand_path File.join(config[server_nickname].fetch('minecraft_version'), server_nickname)
+end
+
+def temporary_render_location
+    File.expand_path File.join(rakefile_directory, 'world-temp')
 end
 
 def minecraft_version
-    '1.7.2'
-end
-
-def temporary_world_location
-    #used for renders
-    '/home/sigma/minecraft-rakefile/world-temp/'
+    config[server_nickname].fetch('minecraft_version')
 end
 
 def send_command(keys)
@@ -52,7 +55,7 @@ namespace :server do
         sleep(1)
         send_command('save-all')
         sleep(5)
-        system "mkdir", "-p", backup_directory
+        system "mkdir", "-p", File.dirname(backup_file)
         system "rm", "-f", backup_file
         system "tar", "czf", backup_file, minecraft_directory
         send_command('save-on')
@@ -81,18 +84,21 @@ end
 namespace :render do
 
     task :setup do
-        # If current version doesn't exist
-        # and change so it doesn't rm each time (change wget to --output-document)
-        system "rm", "-rf", "/home/sigma/.minecraft/"
-        system "mkdir", "-p", "/home/sigma/.minecraft/"
-        system "wget", "https://s3.amazonaws.com/Minecraft.Download/versions/#{minecraft_version}/#{minecraft_version}.jar", "-P", "/home/sigma/.minecraft/versions/#{minecraft_version}/"
-        
-        if not File.directory?('/home/sigma/minecraft-rakefile/Minecraft-Overviewer')
-            system "git", "clone", "https://github.com/overviewer/Minecraft-Overviewer.git", "/home/sigma/minecraft-rakefile/Minecraft-Overviewer/"
-        else
-            system "git", "-c", "/home/sigma/minecraft-rakefile/Minecraft-Overviewer", "pull"
+        current_game_jar = File.expand_path "~/.minecraft/versions/#{minecraft_version}/#{minecraft_version}.jar"
+        system "mkdir", "-p", File.dirname(current_game_jar)
+
+        if not File.exists?(current_game_jar)
+            system "wget", "https://s3.amazonaws.com/Minecraft.Download/versions/#{minecraft_version}/#{minecraft_version}.jar", "--output-document=#{current_game_jar}"
         end
-        system "python2", "/home/sigma/minecraft-rakefile/Minecraft-Overviewer/setup.py", "build"
+
+        if not File.directory?("#{rakefile_directory}/Minecraft-Overviewer")
+            system "git", "clone", "https://github.com/overviewer/Minecraft-Overviewer.git", "#{rakefile_directory}/Minecraft-Overviewer/"
+        else
+            # Don't use keys?
+            system "git", "-c", "#{rakefile_directory}/Minecraft-Overviewer", "pull"
+        end
+
+        system "python2", "#{rakefile_directory}/Minecraft-Overviewer/setup.py", "build"
     end
 
     desc "Render the Minecraft Server using Minecraft Overviewer"
@@ -102,12 +108,12 @@ namespace :render do
         sleep(1)
         send_command('save-all')
         sleep(5)
-        system "mkdir", "-p", "/home/sigma/minecraft-rakefile/world-temp/"
-        system "cp", "-pr", "/home/sigma/minecraft/world/", "/home/sigma/minecraft-rakefile/world-temp/"       
+        system "mkdir", "-p", temporary_render_location
+        system "cp", "-pr", minecraft_directory, temporary_render_location
         send_command('save-on')
         sleep(1)
-        system "python2", "/home/sigma/minecraft-rakefile/Minecraft-Overviewer/overviewer.py", "--config=/home/sigma/minecraft-rakefile/sigma-mco-config.py" 
-        system "rm", "-rf", "/home/sigma/minecraft-rakefile/world-temp/"
+        system "python2", "#{rakefile_directory}/Minecraft-Overviewer/overviewer.py", "--config=#{rakefile_directory}/sigma-mco-config.py"
+        system "rm", "-rf", temporary_render_location
         send_command("say The render has been updated.")
         sleep(1)
     end
@@ -118,14 +124,25 @@ namespace :render do
         sleep(1)
         send_command('save-all')
         sleep(5)
-        system "mkdir", "-p", "/home/sigma/minecraft-rakefile/world-temp/"
-        system "cp", "-pr", "/home/sigma/minecraft/world/", "/home/sigma/minecraft-rakefile/world-temp/"       
+        system "mkdir", "-p", temporary_render_location
+        system "cp", "-pr", minecraft_directory, temporary_render_location
         send_command('save-on')
         sleep(1)
-        system "python2", "/home/sigma/minecraft-rakefile/Minecraft-Overviewer/overviewer.py", "--config=/home/sigma/minecraft-rakefile/sigma-mco-config.py", "--genpoi" 
-        system "rm", "-rf", "/home/sigma/minecraft-rakefile/world-temp/"
+        system "python2", "#{rakefile_directory}Minecraft-Overviewer/overviewer.py", "--config=#{rakefile_directory}/sigma-mco-config.py", "--genpoi"
+        system "rm", "-rf", temporary_render_location
         # if no render.lock
         # Players / Signs with asterisks
     end
 
 end
+
+#desc "print config"
+#task :debug do
+#    puts File.split backup_file
+#end
+
+#desc "Check 'config.yml' File"
+#task :chkcfg do
+#    puts "okay"
+#end
+

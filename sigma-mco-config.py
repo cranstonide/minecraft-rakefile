@@ -3,7 +3,7 @@ def playerIcons(poi):
         poi['icon'] = "http://overviewer.org/avatar/%s" % poi['EntityId']
         return "Last known location for %s" % poi['EntityId']
 
-worlds['Sigma'] = "/home/sigma/minecraft-rakefile/world-temp"
+worlds['Sigma'] = "/home/sigma/minecraft-rakefile/world-temp/minecraft/world"
 outputdir = "/srv/http/sigma"
 
 renders["day"] = {
