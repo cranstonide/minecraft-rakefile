@@ -6,6 +6,8 @@ Setup
 
 Make sure you have *java*, *git*, *ruby*, and *tmux* installed. You should be able to install those through your package manager.
 
+For Minecraft Overviewer you will need *numpy* and *pillow* (provides Imaging.h) for Python.
+
 Clone this repository. Since I have a special `minecraft` user I'll use the home directory, but you can chose whichever directory you'd like.
 
     $ cd ~
@@ -14,6 +16,10 @@ Clone this repository. Since I have a special `minecraft` user I'll use the home
 Edit the configuration portion of the `config.yml` to meet your specific needs.
 
     $ vim config.yml
+
+Edit the directory paths in `sigma-mco-config.py` to meet your specific needs.
+
+    $ vim sigma-mco-config.py
 
 Add cron entries to automate tasks. You can edit your crontab by running `crontab -e`; for more information on cron, check out the [Wikipedia article on cron](http://en.wikipedia.org/wiki/Cron).
 

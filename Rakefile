@@ -128,7 +128,7 @@ namespace :render do
         system "cp", "-pr", minecraft_directory, temporary_render_location
         send_command('save-on')
         sleep(1)
-        system "python2", "#{rakefile_directory}Minecraft-Overviewer/overviewer.py", "--config=#{rakefile_directory}/sigma-mco-config.py", "--genpoi"
+        system "python2", "#{rakefile_directory}/Minecraft-Overviewer/overviewer.py", "--config=#{rakefile_directory}/sigma-mco-config.py", "--genpoi"
         system "rm", "-rf", temporary_render_location
         # if no render.lock
         # Players / Signs with asterisks
