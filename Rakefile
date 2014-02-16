@@ -6,6 +6,7 @@
 #
 
 require 'yaml'
+require 'shellwords'
 
 def config
     @config ||= YAML.load_file File.join(rakefile_directory, 'config.yml')
@@ -22,8 +23,16 @@ def backup_file
     File.expand_path File.join(directory, filename)
 end
 
+def craftbukkit_server
+    config[server_nickname].fetch('craftbukkit_server')
+end
+
 def minecraft_directory
     File.expand_path config[server_nickname].fetch('minecraft_server_directory')
+end
+
+def world_directory
+    return minecraft_directory + "/" + config[server_nickname].fetch('world_dir_name')
 end
 
 def rakefile_directory
@@ -67,7 +76,11 @@ namespace :server do
     desc "Start the Minecraft Server"
     task :start do
         system "tmux new -s #{server_nickname} -d"
-        send_command("cd #{minecraft_directory}; java -Xmx1024M -Xms1024M -jar minecraft_server.jar nogui")
+        if craftbukkit_server == true
+          send_command("cd #{minecraft_directory}; java -Xmx1024M -Xms1024M -jar craftbukkit.jar -o true")
+        else
+          send_command("cd #{minecraft_directory}; java -Xmx1024M -Xms1024M -jar minecraft_server.jar nogui")
+        end
         sleep(5)
     end
 
@@ -95,7 +108,7 @@ namespace :render do
             system "git", "clone", "https://github.com/overviewer/Minecraft-Overviewer.git", "#{rakefile_directory}/Minecraft-Overviewer/"
         else
             # Don't use keys?
-            system "git", "-c", "#{rakefile_directory}/Minecraft-Overviewer", "pull"
+            system "git", "-C", "#{rakefile_directory}/Minecraft-Overviewer", "pull"
         end
 
         system "python2", "#{rakefile_directory}/Minecraft-Overviewer/setup.py", "build"
@@ -109,10 +122,11 @@ namespace :render do
         send_command('save-all')
         sleep(5)
         system "mkdir", "-p", temporary_render_location
-        system "cp", "-pr", minecraft_directory, temporary_render_location
+        quoted_world_dir = Shellwords.escape(world_directory)
+        system("cp -pr " + quoted_world_dir + "/* " + temporary_render_location)
         send_command('save-on')
         sleep(1)
-        system "python2", "#{rakefile_directory}/Minecraft-Overviewer/overviewer.py", "--config=#{rakefile_directory}/sigma-mco-config.py"
+        system "python2", "#{rakefile_directory}/Minecraft-Overviewer/overviewer.py", "--config=#{rakefile_directory}/#{server_nickname}-mco-config.py"
         system "rm", "-rf", temporary_render_location
         send_command("say The render has been updated.")
         sleep(1)
@@ -125,10 +139,11 @@ namespace :render do
         send_command('save-all')
         sleep(5)
         system "mkdir", "-p", temporary_render_location
-        system "cp", "-pr", minecraft_directory, temporary_render_location
+        quoted_world_dir = Shellwords.escape(world_directory)
+        system("cp -pr " + quoted_world_dir + "/* " + temporary_render_location)
         send_command('save-on')
         sleep(1)
-        system "python2", "#{rakefile_directory}/Minecraft-Overviewer/overviewer.py", "--config=#{rakefile_directory}/sigma-mco-config.py", "--genpoi"
+        system "python2", "#{rakefile_directory}/Minecraft-Overviewer/overviewer.py", "--config=#{rakefile_directory}/#{server_nickname}-mco-config.py", "--genpoi"
         system "rm", "-rf", temporary_render_location
         # if no render.lock
         # Players / Signs with asterisks

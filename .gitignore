@@ -1,2 +1,4 @@
 Minecraft-Overviewer/
 world-temp/
+*-mco-config.py
+config.yml

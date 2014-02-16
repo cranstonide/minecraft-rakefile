@@ -13,13 +13,15 @@ Clone this repository. Since I have a special `minecraft` user I'll use the home
     $ cd ~
     $ git clone https://github.com/cranstonide/minecraft-rakefile.git
 
-Edit the configuration portion of the `config.yml` to meet your specific needs.
+Copy config.yml.example to config.yml and then edit the configuration portion of the `config.yml` to meet your specific needs. Replace "sigma" with your server nickname.
 
+    $ cp config.yml.example config.yml
     $ vim config.yml
 
-Edit the directory paths in `sigma-mco-config.py` to meet your specific needs.
+Copy myworld-mco-config.py.example to world-mco-config.py ('world' should match your server_nickname) and then edit the directory paths to meet your specific needs.
 
-    $ vim sigma-mco-config.py
+    $ cp myworld-mco-config.py.example myworld-mco-config.py
+    $ vim myworld-mco-config.py
 
 Add cron entries to automate tasks. You can edit your crontab by running `crontab -e`; for more information on cron, check out the [Wikipedia article on cron](http://en.wikipedia.org/wiki/Cron).
 
