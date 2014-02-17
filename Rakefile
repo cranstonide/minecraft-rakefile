@@ -92,6 +92,18 @@ namespace :server do
         sleep(5)
         send_command('exit')
     end
+
+    desc "Restart the Minecraft Server"
+    task :restart do
+      Rake::Task["server:stop"].invoke
+      Rake::Task["server:start"].invoke
+    end
+
+    desc "Attach to server console"
+    task :console do
+      system "tmux attach -t #{server_nickname}"
+    end
+
 end
 
 namespace :render do
