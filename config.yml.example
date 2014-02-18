@@ -1,0 +1,12 @@
+# Minecraft Rakefile Yaml configruation
+
+
+# # top level is server nickname (shouldnt have spaces)
+myworld:
+    craftbukkit_server:         true
+    minecraft_server_directory: "/home/minecraft/server"
+    world_dir_name:             "My World"
+    backup_directory:           "/home/minecraft/backups/server"
+    minecraft_version:          "1.7.4"
+    render_directory:           "/var/www/html/minecraft/render"
+

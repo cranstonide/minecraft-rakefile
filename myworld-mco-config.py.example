@@ -3,18 +3,18 @@ def playerIcons(poi):
         poi['icon'] = "http://overviewer.org/avatar/%s" % poi['EntityId']
         return "Last known location for %s" % poi['EntityId']
 
-worlds['Sigma'] = "/home/sigma/minecraft-rakefile/world-temp/minecraft/world"
-outputdir = "/srv/http/sigma"
+worlds['myworld'] = "/home/minecraft/minecraft-rakefile/world-temp/minecraft/world"
+outputdir = "/var/www/html/minecraft/render"
 
 renders["day"] = {
-        'world': 'Sigma',
+        'world': 'myworld',
         'title': 'Day',
         'rendermode': 'smooth_lighting',
         'markers': [dict(name="Players", filterFunction=playerIcons)]
         }
 
 renders["night"] = {
-        'world': 'Sigma',
+        'world': 'myworld',
         'title': 'Night',
         'rendermode': 'smooth_night',
         'markers': [dict(name="Players", filterFunction=playerIcons)]
